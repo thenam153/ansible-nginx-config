@@ -1,0 +1,11 @@
+---
+# handlers file for nginx-config
+- name: restart nginx
+  service: name=nginx state=restarted
+
+- name: validate nginx configuration
+  command: nginx -t
+  changed_when: false # never notify changed
+
+- name: reload nginx
+  service: name=nginx state=reloaded

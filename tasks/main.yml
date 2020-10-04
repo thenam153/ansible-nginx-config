@@ -1,0 +1,37 @@
+---
+# Import variable
+- name: Include Os variable
+  include_vars: "{{ ansible_os_family }}.yaml"
+
+# Setup nginx
+- name: Install for RedHat
+  include_tasks: "RedHat.yaml"
+  when: ansible_os_family == "RedHat"
+
+- name: Install for Ubuntu
+  include_tasks: "Ubuntu.yaml"
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install for Debian
+  include_tasks: "Debian.yaml"
+  when: ansible_os_family == "Debian"
+
+# Config vhost
+- import_tasks: vhosts.yaml
+
+# Config nginx
+- name: Copy nginx configuration
+  template:
+    src: "{{ nginx_conf_template }}"
+    dest: "{{ nginx_conf_file_path }}"
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+  notify:
+    - reload nginx
+
+- name: Ensure nginx service running 
+  service:
+    name: nginx
+    state: "{{ nginx_server_state }}"
+    enabled: "{{ nginx_service_enabled }}"
